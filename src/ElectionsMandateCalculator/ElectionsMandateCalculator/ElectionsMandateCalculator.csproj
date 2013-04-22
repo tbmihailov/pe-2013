@@ -47,6 +47,7 @@
     <Compile Include="Helpers\InputParsers.cs" />
     <Compile Include="Helpers\Logger.cs" />
     <Compile Include="Models\ElectionsModels.cs" />
+    <Compile Include="Models\MandatesCalculator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

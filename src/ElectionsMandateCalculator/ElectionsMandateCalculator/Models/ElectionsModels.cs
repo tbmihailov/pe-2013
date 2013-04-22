@@ -47,10 +47,13 @@ namespace ElectionsMandateCalculator
             Id = id;
             MandatesLimit = mandatesLimit;
             Name = name;
+            CurrentMandates = 0;
         }
         public int Id { get; set; }
         public string Name { get; set; }
         public int MandatesLimit { get; set; }
+        public int CurrentMandates { get; set; }
+        public int MyProperty { get; set; }
     }
 
 
@@ -68,11 +71,13 @@ namespace ElectionsMandateCalculator
             Id = id;
             Name = name;
             Type = id >= 1000 ? PartyType.InitCommittee : PartyType.Party;
+            MandatesCount = 0;
         }
 
         public int Id { get; set; }
         public string Name { get; set; }
         public PartyType Type { get; set; }
+        public int MandatesCount { get; set; }
     }
 
     /// <summary>
@@ -104,6 +109,13 @@ namespace ElectionsMandateCalculator
         /// Valid votes
         /// </summary>
         public int Count { get; set; }
+    }
+
+    public class Result
+    {
+        public int MirId { get; set; }
+        public int PartyId { get; set; }
+        public decimal MandatesValue { get; set; }
     }
 
 }
