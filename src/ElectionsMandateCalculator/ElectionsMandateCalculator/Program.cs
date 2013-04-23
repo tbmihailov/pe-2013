@@ -13,7 +13,7 @@ namespace ElectionsMandateCalculator
     {
         static void Main(string[] args)
         {
-            string dir = "tests";
+            string dir = "tests\\1";
 
             //MIRS
             string mirsFilePath = Path.Combine(dir, "MIRs.txt");
@@ -33,12 +33,19 @@ namespace ElectionsMandateCalculator
             //votes
             string votesFilePath = Path.Combine(dir, "Votes.txt");
             var votes = InputParsers.ParseVotesListFromFile(votesFilePath);
-           Logger.Info(string.Format("Votes:{0}", votes.Count));
+            Logger.Info(string.Format("Votes:{0}", votes.Count));
 
             //lots
             string lotsFilePath = Path.Combine(dir, "Lot.txt");
-            var lots = InputParsers.ParseLotsListFromFile(lotsFilePath);
-            Logger.Info(string.Format("Lots:{0}", lots.Count));
+            if (File.Exists(lotsFilePath))
+            {
+                var lots = InputParsers.ParseLotsListFromFile(lotsFilePath);
+                Logger.Info(string.Format("Lots:{0}", lots.Count));
+            }
+            else
+            {
+                Logger.Info("No Lots file");
+            }
 
             var calc = new MandatesCalculator(mirs, parties, votes);
             calc.CalculateMandates();

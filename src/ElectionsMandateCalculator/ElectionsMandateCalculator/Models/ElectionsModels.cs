@@ -16,12 +16,12 @@ namespace ElectionsMandateCalculator
     /// </summary>
     public class Candidate
     {
-        public Candidate(int mirId, int partyId, int seqNum, string name)
+        public Candidate(int mirId, int partyId,string name)
         {
             MirId = mirId;
             PartyId = partyId;
             Name = name;
-            SeqNum = seqNum;
+            SeqNum = 0;
             PartyType = partyId >= 1000 ? PartyType.InitCommittee : PartyType.Party;
         }
 
@@ -126,6 +126,21 @@ namespace ElectionsMandateCalculator
         public int MirId { get; set; }
         public int PartyId { get; set; }
         public decimal MandatesValue { get; set; }
+    }
+
+    public class Mandate
+    {
+        private int p1;
+        private int p2;
+
+        public Mandate(int mirId, int partyId)
+        {
+            // TODO: Complete member initialization
+            this.MirId = mirId;
+            this.PartyId = partyId;
+        }
+        public int MirId { get; set; }
+        public int PartyId { get; set; }
     }
 
 }

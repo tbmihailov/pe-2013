@@ -86,8 +86,7 @@ namespace ElectionsMandateCalculator.Helpers
             var item = new Candidate(
                                 mirId: int.Parse(propValues[0]),
                                 partyId: int.Parse(propValues[1]),
-                                seqNum: int.Parse(propValues[2]),
-                                name: propValues[3]
+                                name: propValues[2]
                             );
 
             return item;
@@ -163,14 +162,18 @@ namespace ElectionsMandateCalculator.Helpers
         public static List<Candidate> ParseCandidatesListFromFile(string fileName)
         {
             var itemsList = new List<Candidate>();
-
+            
             string line;
             // Read the file and display it line by line.
             System.IO.StreamReader file =
                new System.IO.StreamReader(fileName);
+            int currMirId = 0;
+            int currPartyId = 0;
+            int currCandidateIndex = 0;
             while ((line = file.ReadLine()) != null)
             {
                 var item = ParseCandidateFromString(line);
+
                 itemsList.Add(item);
             }
 
