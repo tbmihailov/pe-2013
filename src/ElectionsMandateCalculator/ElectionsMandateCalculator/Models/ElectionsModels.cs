@@ -54,6 +54,8 @@ namespace ElectionsMandateCalculator
         public int MandatesLimit { get; set; }
         public int CurrentMandates { get; set; }
         public int MyProperty { get; set; }
+
+        public string DisplayName { get { return string.Format("{0} - {1}", Id, Name); } }
     }
 
 
@@ -72,6 +74,14 @@ namespace ElectionsMandateCalculator
             Name = name;
             Type = id >= 1000 ? PartyType.InitCommittee : PartyType.Party;
             MandatesCount = 0;
+        }
+
+        public string DisplayName
+        {
+            get
+            {
+                return string.Format("{0} - {1}", Id, Name);
+            }
         }
 
         public int Id { get; set; }

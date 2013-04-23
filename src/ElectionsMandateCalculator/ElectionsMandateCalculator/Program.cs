@@ -1,4 +1,5 @@
 ﻿using ElectionsMandateCalculator.Helpers;
+using ElectionsMandateCalculator.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -38,6 +39,9 @@ namespace ElectionsMandateCalculator
             string lotsFilePath = Path.Combine(dir, "Lot.txt");
             var lots = InputParsers.ParseLotsListFromFile(lotsFilePath);
             Logger.Info(string.Format("Lots:{0}", lots.Count));
+
+            var calc = new MandatesCalculator(mirs, parties, votes);
+            calc.CalculateMandates();
         }
     }
 }
