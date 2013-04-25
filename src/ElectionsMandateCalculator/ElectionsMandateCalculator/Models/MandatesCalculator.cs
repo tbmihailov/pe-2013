@@ -223,6 +223,22 @@ namespace ElectionsMandateCalculator.Models
             decimal globalHaerQuote = (decimal)allVotesTable2 / allMandatesAfterStep0;
             Logger.logger.InfoFormat("GHQ = {0} = {1}/{2}", globalHaerQuote, allVotesTable2, allMandatesAfterStep0);
 
+            //parties with calc info
+            var partiesWithCalcInfo = new List<PartyWithCalcInfo>();
+            for (int i = 0; i < partiesCountInTable2; i++)
+            {
+                var partyWithCalcInfo = new PartyWithCalcInfo()
+                {
+                    Index = i,
+                    PartyId = partiesTable2[i].Id,
+                    Votes = 0,
+                };
+                partiesWithCalcInfo.Add(partyWithCalcInfo);
+
+            }
+
+            var partiesWithCalcInfoArr = partiesWithCalcInfo.OrderBy(p=>p.Index).ToArray();
+
             //calculate mir and partyVotes votes
             int[] mirVotesCountTable2 = new int[mirsCount];
             int[] partyVotesCountTable2 = new int[partiesCountTable1];
@@ -232,26 +248,58 @@ namespace ElectionsMandateCalculator.Models
                 {
                     mirVotesCountTable2[i] += votesTable2[i, j];
                     partyVotesCountTable2[j] += votesTable2[i, j];
+                    partiesWithCalcInfoArr[j].Votes = partyVotesCountTable2[j];
                 }
             }
 
             //mandates that every party should have
-            decimal[] partiesGlobalMandatesCoef = new decimal[partiesCountTable2];
             for (int i = 0; i < partiesCountTable2; i++)
             {
-                decimal partyVotes = (decimal)partyVotesCountTable2[i];
-                partiesGlobalMandatesCoef[i] = decimal.Divide(partyVotes, globalHaerQuote);
+                decimal mandateCoefHare = decimal.Divide(partyVotesCountTable2[i], globalHaerQuote);
+                partiesWithCalcInfoArr[i].MandateCoefHare = mandateCoefHare;
+                
+                int mandatesInit = (int)mandateCoefHare;
+                partiesWithCalcInfoArr[i].MandatesInit = mandatesInit;
+                partiesWithCalcInfoArr[i].MandatesAll = mandatesInit;
+                
+                decimal mandateCoefHareR = mandateCoefHare - mandatesInit;
+                partiesWithCalcInfoArr[i].MandateCoefHareR = mandateCoefHareR;
             }
 
-            //TO DO calculate initial global mandates
+            //summary init mandates given
+            int mandatesInitGiven = partiesWithCalcInfoArr.Sum(p => p.MandatesInit);
+            int mandatesGivenRest = allMandatesAfterStep0 - mandatesInitGiven;
 
-            //TO DO calculate additional global mandates
+            //set additional mandates
+            var partiesOrderedByCoefR = partiesWithCalcInfoArr.OrderByDescending(p => p.MandateCoefHareR).ToArray();
+            for (int i = 0; i < mandatesGivenRest; i++)
+            {
+                partiesOrderedByCoefR[i].MandatesAdditional++;
+                partiesOrderedByCoefR[i].MandatesAll = partiesOrderedByCoefR[i].MandatesInit + partiesOrderedByCoefR[i].MandatesAdditional;
+            }
+            partiesWithCalcInfoArr = partiesOrderedByCoefR.OrderBy(p => p.Index).ToArray();
 
-            //TO DO calculate overall mandates
-
-            // ..
+            Logger.logger.Info("Global mandates final:");
+            foreach (var party in partiesWithCalcInfoArr)
+            {
+                Logger.logger.InfoFormat("{0} - {1}", party.PartyId, party.MandatesAll);
+            }
 
         }
 
+    }
+
+    class PartyWithCalcInfo
+    {
+        public int PartyId { get; set; }
+        public int Index { get; set; }
+        public int Votes { get; set; }
+
+        public decimal MandateCoefHare { get; set; }
+        public decimal MandateCoefHareR { get; set; }
+        
+        public int MandatesInit { get; set; }
+        public int MandatesAdditional { get; set; }
+        public int MandatesAll { get; set; }
     }
 }
