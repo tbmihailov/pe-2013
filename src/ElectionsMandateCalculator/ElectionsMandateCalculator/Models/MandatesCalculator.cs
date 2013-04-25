@@ -27,11 +27,9 @@ namespace ElectionsMandateCalculator.Models
             int partiesCount = _partiesAll.Count;
 
             _givenMandatesTable1 = new int[mirsCount, partiesCount];
-            _mandatesGiven = new List<Mandate>();
         }
 
         //table 1
-
         int[,] _givenMandatesTable1;//all votes per party per mir
 
         int[] _mirMandatesAvailable;//available mandates left
@@ -78,14 +76,6 @@ namespace ElectionsMandateCalculator.Models
 
             //fill votes table
             int[,] votesTable1 = new int[mirsCount, partiesCountTable1];//all votes per party per mir
-            for (int i = 0; i < mirsCount; i++)
-            {
-                for (int j = 0; j < partiesCountTable1; j++)
-                {
-                    votesTable1[i, j] = 0;
-                }
-            }
-            //fill votes table with votes
             foreach (var vote in _votesAll)
             {
                 votesTable1[mirIndeces[vote.MirId], partyIndecesTable1[vote.PartyId]] = vote.Count;
@@ -146,7 +136,6 @@ namespace ElectionsMandateCalculator.Models
                         {
                             Logger.logger.InfoFormat("IC {0} has {1} votes in MIR {2} {3} {4}", _parties[i].DisplayName, partyMirVotesCnt, _mirs[j].DisplayName, partyMirVotesCnt >= mirMandateQuote ? ">=" : "<", mirMandateQuote);
                             _givenMandatesTable1[j, i] += 1;
-                            _mandatesGiven.Add(new Mandate(_mirs[j].Id, _parties[i].Id));
                             _mirMandatesAvailable[j] -= 1;
                             //INITITIVE COMMITTEE can have only 1 mandate in only 1 MIR
                         }
@@ -200,8 +189,9 @@ namespace ElectionsMandateCalculator.Models
                     for (int i = 0; i < mirsCount; i++)
                     {
                         votesTable2[i, partyIndexTable2] = votesTable1[i, j];
-                        givenMandatesTable2[i, partyIndexTable2] = _givenMandatesTable1[i, j];
+                        givenMandatesTable2[i, partyIndexTable2] = 0;//_givenMandatesTable1[i, j];
                     }
+
                     partiesListTable2.Add(_parties[j]);
                     partyIndexTable2++;
                 }
@@ -220,24 +210,33 @@ namespace ElectionsMandateCalculator.Models
                 }
             }
 
-            decimal globalHaerQuote = (decimal)allVotesTable2 / allMandatesAfterStep0;
-            Logger.logger.InfoFormat("GHQ = {0} = {1}/{2}", globalHaerQuote, allVotesTable2, allMandatesAfterStep0);
+            decimal globalHareQuote = (decimal)allVotesTable2 / allMandatesAfterStep0;
+            Logger.logger.InfoFormat("GHQ = {0} = {1}/{2}", globalHareQuote, allVotesTable2, allMandatesAfterStep0);
 
             //parties with calc info
-            var partiesWithCalcInfo = new List<PartyWithCalcInfo>();
+            var partiesWithCalcInfo = new List<PartyCalcInfo>();
             for (int i = 0; i < partiesCountInTable2; i++)
             {
-                var partyWithCalcInfo = new PartyWithCalcInfo()
+                var partyWithCalcInfo = new PartyCalcInfo()
                 {
                     Index = i,
                     PartyId = partiesTable2[i].Id,
-                    Votes = 0,
                 };
                 partiesWithCalcInfo.Add(partyWithCalcInfo);
 
             }
 
-            var partiesWithCalcInfoArr = partiesWithCalcInfo.OrderBy(p=>p.Index).ToArray();
+            //calculate party mir mandates
+            var mirsWithCalcInfo = new List<MirCalcInfo>();
+            for (int i = 0; i < mirsCount; i++)
+            {
+                var mirCalcInfo = new MirCalcInfo()
+                {
+                    MirId = _mirs[i].Id,
+                    MirIndex = i,
+                };
+                mirsWithCalcInfo.Add(mirCalcInfo);
+            }
 
             //calculate mir and partyVotes votes
             int[] mirVotesCountTable2 = new int[mirsCount];
@@ -246,60 +245,157 @@ namespace ElectionsMandateCalculator.Models
             {
                 for (int j = 0; j < partiesCountTable2; j++)
                 {
+                    //mir votes
                     mirVotesCountTable2[i] += votesTable2[i, j];
+                    mirsWithCalcInfo[i].Votes = mirVotesCountTable2[i];
+                    mirsWithCalcInfo[i].MandatesLimit = _mirMandatesAvailable[i];
+                    mirsWithCalcInfo[i].MandateHareQuote = _mirMandatesAvailable[i] != 0 ? decimal.Divide(mirVotesCountTable2[i], _mirMandatesAvailable[i]) : 0;
+                    //party votes
                     partyVotesCountTable2[j] += votesTable2[i, j];
-                    partiesWithCalcInfoArr[j].Votes = partyVotesCountTable2[j];
+                    partiesWithCalcInfo[j].Votes = partyVotesCountTable2[j];
                 }
             }
 
             //mandates that every party should have
             for (int i = 0; i < partiesCountTable2; i++)
             {
-                decimal mandateCoefHare = decimal.Divide(partyVotesCountTable2[i], globalHaerQuote);
-                partiesWithCalcInfoArr[i].MandateCoefHare = mandateCoefHare;
-                
+                decimal mandateCoefHare = decimal.Divide(partyVotesCountTable2[i], globalHareQuote);
                 int mandatesInit = (int)mandateCoefHare;
-                partiesWithCalcInfoArr[i].MandatesInit = mandatesInit;
-                partiesWithCalcInfoArr[i].MandatesAll = mandatesInit;
-                
+                partiesWithCalcInfo[i].MandatesGivenInit = mandatesInit;
                 decimal mandateCoefHareR = mandateCoefHare - mandatesInit;
-                partiesWithCalcInfoArr[i].MandateCoefHareR = mandateCoefHareR;
+                partiesWithCalcInfo[i].MandateCoefHareR = mandateCoefHareR;
             }
 
             //summary init mandates given
-            int mandatesInitGiven = partiesWithCalcInfoArr.Sum(p => p.MandatesInit);
-            int mandatesGivenRest = allMandatesAfterStep0 - mandatesInitGiven;
+            int mandatesInitGiven = partiesWithCalcInfo.Sum(p => p.MandatesGivenInit);
+            int mandatesLeft = allMandatesAfterStep0 - mandatesInitGiven;
 
             //set additional mandates
-            var partiesOrderedByCoefR = partiesWithCalcInfoArr.OrderByDescending(p => p.MandateCoefHareR).ToArray();
-            for (int i = 0; i < mandatesGivenRest; i++)
+            var partiesOrderedByCoefR = partiesWithCalcInfo.OrderByDescending(p => p.MandateCoefHareR).ToArray();
+            int mi = 0;
+            while (mandatesLeft > 0)
             {
-                partiesOrderedByCoefR[i].MandatesAdditional++;
-                partiesOrderedByCoefR[i].MandatesAll = partiesOrderedByCoefR[i].MandatesInit + partiesOrderedByCoefR[i].MandatesAdditional;
+                decimal currR = partiesOrderedByCoefR[mi].MandateCoefHareR;
+                int k = 0;
+                int j = mi + 1;
+                while (j < partiesCountTable2 && partiesOrderedByCoefR[j].MandateCoefHareR == currR)
+                {
+                    k++;
+                }
+                if (k > mandatesLeft)
+                {
+                    throw new Exception("LOT");//TO DO implement
+                }
+
+                mi++;
+                partiesOrderedByCoefR[mi].MandatesGivenAdditional++;
+                mandatesLeft--;
             }
-            partiesWithCalcInfoArr = partiesOrderedByCoefR.OrderBy(p => p.Index).ToArray();
+
+            partiesWithCalcInfo = partiesOrderedByCoefR.OrderBy(p => p.Index).ToList();
 
             Logger.logger.Info("Global mandates final:");
-            foreach (var party in partiesWithCalcInfoArr)
+            foreach (var party in partiesWithCalcInfo)
             {
                 Logger.logger.InfoFormat("{0} - {1}", party.PartyId, party.MandatesAll);
             }
 
-        }
+            //calculate per mir mandates
+            MirPartyCalcInfo[,] mirPartyTable = new MirPartyCalcInfo[mirsCount, partiesCountTable2];
+            for (int i = 0; i < mirsCount; i++)
+            {
+                for (int j = 0; j < partiesCountTable2; j++)
+                {
+                    int votes = votesTable2[i, j];
+                    decimal mandateCoefHare = mirsWithCalcInfo[i].MandateHareQuote != 0 ? decimal.Divide(votes, mirsWithCalcInfo[i].MandateHareQuote) : 0;
+                    int mandatesInit = (int)mandateCoefHare;
+                    decimal mandateCoefHareR = mandateCoefHare - mandateCoefHare;
 
+                    var mirparty = new MirPartyCalcInfo()
+                    {
+                        MandateCoefHareR = mandateCoefHareR,
+                        MandatesInit = mandatesInit,
+                        IsMandateCoefHareRUsed = false,
+                    };
+
+                    mirsWithCalcInfo[i].MandatesGivenInit += mandatesInit;
+                    partiesWithCalcInfo[i].MandatesGivenByMirsInit += mandatesInit;
+                    mirPartyTable[i, j] = mirparty;//for indexed table access
+                }
+            }
+
+
+
+
+        }
     }
 
-    class PartyWithCalcInfo
+    class MirCalcInfo
+    {
+        public int MirId { get; set; }
+        public int MirIndex { get; set; }
+
+        public int Votes { get; set; }
+        public int MandatesLimit { get; set; }
+        public decimal MandateHareQuote { get; set; }
+        public int MandatesGivenInit { get; set; }
+        public int MandatesGivenAdditional { get; set; }
+
+        List<MirPartyCalcInfo> _mirPartyInfos;
+        public List<MirPartyCalcInfo> MirPartyInfos
+        {
+            get
+            {
+                if (_mirPartyInfos == null)
+                {
+                    _mirPartyInfos = new List<MirPartyCalcInfo>();
+                }
+                return _mirPartyInfos;
+            }
+            set { _mirPartyInfos = value; }
+        }
+    }
+
+    class PartyCalcInfo
     {
         public int PartyId { get; set; }
         public int Index { get; set; }
         public int Votes { get; set; }
 
-        public decimal MandateCoefHare { get; set; }
+        //public decimal MandateCoefHare { get; set; }
         public decimal MandateCoefHareR { get; set; }
-        
+
+        //national
+        public int MandatesGivenInit { get; set; }
+        public int MandatesGivenAdditional { get; set; }
+        public int MandatesAll { get { return MandatesGivenInit + MandatesGivenAdditional; } }
+
+        //by mirs
+        public int MandatesGivenByMirsInit { get; set; }
+        public int MandatesGivenByMirsAdditional { get; set; }
+        public int MandatesByMirsAll { get { return MandatesGivenByMirsInit + MandatesGivenByMirsAdditional; } }
+
+      
+    }
+
+    class MirPartyCalcInfo
+    {
+        //public int PartyId { get; set; }
+        //public int PartyIndex { get; set; }
+        //public PartyCalcInfo Party { get; set; }
+
+        //public int MirId { get; set; }
+        //public int MirIndex { get; set; }
+        //public MirCalcInfo Mir { get; set; }
+
         public int MandatesInit { get; set; }
         public int MandatesAdditional { get; set; }
-        public int MandatesAll { get; set; }
+        public int MandatesGiven { get { return MandatesInit + MandatesAdditional; } }
+        public int MandatesLimit { get; set; }
+
+        public decimal MandateCoefHareR { get; set; }
+        public bool IsMandateCoefHareRUsed { get; set; }
+
+
     }
 }
