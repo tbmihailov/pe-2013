@@ -13,7 +13,7 @@ namespace ElectionsMandateCalculator.Models
         List<Party> _partiesAll;
         List<Mir> _mirsAll;
         List<Vote> _votesAll;
-        List<Mandate> _mandatesGiven;
+        List<FinalMandateInfo> _finalMandateInfos;
 
         public MandatesCalculator(IEnumerable<Mir> mirs, IEnumerable<Party> parties, IEnumerable<Vote> votes)
         {
@@ -27,6 +27,7 @@ namespace ElectionsMandateCalculator.Models
             int partiesCount = _partiesAll.Count;
 
             _givenMandatesTable1 = new int[mirsCount, partiesCount];
+            _finalMandateInfos = new List<FinalMandateInfo>();
         }
 
         //table 1
@@ -138,6 +139,7 @@ namespace ElectionsMandateCalculator.Models
                             _givenMandatesTable1[j, i] += 1;
                             _mirMandatesAvailable[j] -= 1;
                             //INITITIVE COMMITTEE can have only 1 mandate in only 1 MIR
+                            _finalMandateInfos.Add(new FinalMandateInfo { MirId = _mirs[i].Id, PartyId = _parties[i].Id, MandatesCount = 1 });
                         }
                         workingPartyFlagsTable1[i] = false;
                         //Logger.logger.InfoFormat("{0} excluded from working parties", _parties[i].DisplayName);
@@ -277,7 +279,7 @@ namespace ElectionsMandateCalculator.Models
             {
                 decimal currR = partiesOrderedByCoefR[mi].MandateCoefHareR;
                 int k = 0;
-                int j = mi+1;
+                int j = mi + 1;
                 while (j < partiesCountTable2 && partiesOrderedByCoefR[j].MandateCoefHareR == currR)
                 {
                     k++;
@@ -386,8 +388,8 @@ namespace ElectionsMandateCalculator.Models
                 }
 
                 sbLine.AppendFormat("[{0,2}]", sum);
-                sbLine.AppendFormat(" of [{0,2}]", mirsWithCalcInfo[i].MandatesLimit);;
-                
+                sbLine.AppendFormat(" of [{0,2}]", mirsWithCalcInfo[i].MandatesLimit); ;
+
                 Logger.logger.Info(sbLine.ToString());
 
             }
@@ -407,12 +409,117 @@ namespace ElectionsMandateCalculator.Models
                 Logger.logger.Info(sbLine.ToString());
             }
 
+
             Logger.logger.Info("Mir mandates current:");
             foreach (var party in partiesWithCalcInfo)
             {
-                Logger.logger.InfoFormat("{0} : [{2}] {1,2} needed {3}", party.PartyId, party.MandatesByMirsAll, party.MandatesAll, party.MandatesByMirsNeeded);
+                Logger.logger.InfoFormat("{0} : [{2}] {1,2} unnecessary {3}", party.PartyId, party.MandatesByMirsAll, party.MandatesAll, party.MandatesByMirsUnncessary);
             }
 
+            while (partiesWithCalcInfo.Count(p => p.MandatesByMirsUnncessary < 0) > 0)
+            {
+                int minUsedCoefI = 0;
+                int minUsedCoefJ = 0;
+                decimal minUsedCoef = 1.0M;
+                bool hasMinUsedCoef = false;
+
+                for (int i = 0; i < mirPartyTable.GetLength(0); i++)
+                {
+                    for (int j = 0; j < mirPartyTable.GetLength(1); j++)
+                    {
+                        //min used coef
+                        if (partiesWithCalcInfo[j].MandatesByMirsUnncessary > 0)
+                        {
+                            if (mirPartyTable[i, j].IsMandateCoefHareRUsed
+                                && !mirPartyTable[i, j].IsMandateCoefHareRUsed2)
+                            {
+                                if (mirPartyTable[i, j].MandateCoefHareR < minUsedCoef)
+                                {
+                                    minUsedCoef = mirPartyTable[i, j].MandateCoefHareR;
+                                    minUsedCoefI = i;
+                                    minUsedCoefJ = j;
+                                    hasMinUsedCoef = true;
+                                }
+                            }
+                        }
+
+
+                    }
+                }
+
+                int maxUnsedCoefI = 0;
+                int maxUnsedCoefJ = 0;
+                decimal maxUnsedCoef = 0.0M;
+                bool hasMaxUnusedCoef = false;
+
+                //find max unused coef
+                if (hasMinUsedCoef)
+                {
+                    int i = minUsedCoefI;
+                    for (int j = 0; j < mirPartyTable.GetLength(1); j++)
+                    {
+                        //max unused coef
+                        if (!mirPartyTable[i, j].IsMandateCoefHareRUsed
+                            && !mirPartyTable[i, j].IsMandateCoefHareRUsed2)
+                        {
+                            if (mirPartyTable[i, j].MandateCoefHareR > maxUnsedCoef)//> only because parties are sorted by ID
+                            {
+                                maxUnsedCoef = mirPartyTable[i, j].MandateCoefHareR;
+                                maxUnsedCoefI = i;
+                                maxUnsedCoefJ = j;
+                                hasMaxUnusedCoef = true;
+                            }
+                        }
+                    }
+
+                    //update for mandates
+                    if (hasMaxUnusedCoef)
+                    {
+                        mirPartyTable[minUsedCoefI, minUsedCoefJ].MandatesAdditional--;
+                        partiesWithCalcInfo[minUsedCoefJ].MandatesGivenByMirsAdditional--;
+                        mirPartyTable[minUsedCoefI, minUsedCoefJ].IsMandateCoefHareRUsed2 = true;
+
+                        mirPartyTable[maxUnsedCoefI, maxUnsedCoefJ].MandatesAdditional++;
+                        partiesWithCalcInfo[maxUnsedCoefJ].MandatesGivenByMirsAdditional++;
+                        mirPartyTable[maxUnsedCoefI, maxUnsedCoefJ].IsMandateCoefHareRUsed = true;
+                    }
+                }
+
+                Logger.logger.Info("Mir mandates current:");
+                foreach (var party in partiesWithCalcInfo)
+                {
+                    Logger.logger.InfoFormat("{0} : [{2}] {1,2} unnecessary {3}", party.PartyId, party.MandatesByMirsAll, party.MandatesAll, party.MandatesByMirsUnncessary);
+                }
+            }
+
+
+            //final mandates
+            for (int i = 0; i < mirPartyTable.GetLength(0); i++)
+            {
+                for (int j = 0; j < mirPartyTable.GetLength(1); j++)
+                {
+                    if (mirPartyTable[i, j].MandatesGiven > 0)
+                    {
+                        var finalMandateInfo = new FinalMandateInfo()
+                        {
+                            MirId = mirsWithCalcInfo[i].MirId,
+                            PartyId = partiesWithCalcInfo[j].PartyId,
+                            MandatesCount = mirPartyTable[i, j].MandatesGiven,
+                        };
+                        _finalMandateInfos.Add(finalMandateInfo);
+                    }
+                }
+            }
+
+            foreach (var mif in _finalMandateInfos)
+            {
+                Logger.logger.InfoFormat("{0},{1},{2}", mif.MirId, mif.PartyId, mif.MandatesCount);
+            }
+
+            //TODO: add output to file Results.txt
+
+            //TODO: add checks for 1. MIRS final mandates and mandate limit
+            //TODO: add checks for 2. Parties final mandates and global mandate limit
         }
     }
 
@@ -462,9 +569,7 @@ namespace ElectionsMandateCalculator.Models
         public int MandatesGivenByMirsAdditional { get; set; }
         public int MandatesByMirsAll { get { return MandatesGivenByMirsInit + MandatesGivenByMirsAdditional; } }
 
-
-
-        public int MandatesByMirsNeeded { get { return MandatesAll - MandatesByMirsAll; } }
+        public int MandatesByMirsUnncessary { get { return MandatesByMirsAll - MandatesAll; } }
     }
 
     class MirPartyCalcInfo
@@ -485,6 +590,13 @@ namespace ElectionsMandateCalculator.Models
         public decimal MandateCoefHareR { get; set; }
         public bool IsMandateCoefHareRUsed { get; set; }
 
+        public bool IsMandateCoefHareRUsed2 { get; set; }//used in last step for unnecessary mandates
+    }
 
+    class FinalMandateInfo
+    {
+        public int MirId { get; set; }
+        public int PartyId { get; set; }
+        public int MandatesCount { get; set; }
     }
 }
