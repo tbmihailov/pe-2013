@@ -49,8 +49,13 @@
     <Compile Include="Helpers\CompareHelpers.cs" />
     <Compile Include="Helpers\InputParsers.cs" />
     <Compile Include="Helpers\Logger.cs" />
-    <Compile Include="Models\ElectionsModels.cs" />
+    <Compile Include="Models\Candidate.cs" />
     <Compile Include="Models\MandatesCalculator.cs" />
+    <Compile Include="Models\Mir.cs" />
+    <Compile Include="Models\Party.cs" />
+    <Compile Include="Models\PartyType.cs" />
+    <Compile Include="Models\Result.cs" />
+    <Compile Include="Models\Vote.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

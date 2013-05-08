@@ -13,43 +13,30 @@ namespace ElectionsMandateCalculator.Models
         List<Party> _partiesAll;
         List<Mir> _mirsAll;
         List<Vote> _votesAll;
-        List<Result> _finalMandateInfos;
+        List<Result> _results;
 
-        public List<Result> FinalMandateInfos
+        public List<Result> Results
         {
-            get { return _finalMandateInfos; }
+            get { return _results; }
         }
-
-        
 
         public MandatesCalculator(IEnumerable<Mir> mirs, IEnumerable<Party> parties, IEnumerable<Vote> votes)
         {
             _mirsAll = mirs.OrderBy(m => m.Id).ToList();
-
             _partiesAll = parties.OrderBy(p => p.Id).ToList();
-
             _votesAll = new List<Vote>(votes);
 
             int mirsCount = _mirsAll.Count;
             int partiesCount = _partiesAll.Count;
 
-            _givenMandatesTable1 = new int[mirsCount, partiesCount];
-            _finalMandateInfos = new List<Result>();
+            
+            _results = new List<Result>();
         }
 
         //table 1
-        int[,] _givenMandatesTable1;//all votes per party per mir
+        //int[,] _givenMandatesTable1;//all votes per party per mir
 
         int[] _mirMandatesAvailable;//available mandates left
-
-
-        //decimal _mirMandateQuote;//votes/mandates
-
-        //int _allVotesCount;
-        //decimal _fourPercentBarrier;
-
-
-        int _allMandates;
 
         public void CalculateMandates()
         {
@@ -125,6 +112,7 @@ namespace ElectionsMandateCalculator.Models
             //check which INITIATIVE candidates pass the mir quote and give them a MANDATE
             int initPartiesCount = _parties.Count(p => p.Type == PartyType.InitCommittee);
 
+            int[,] _givenMandatesTable1 = new int[mirsCount, partiesCountTable1];
             Logger.logger.InfoFormat("Initiative committees:{0}", initPartiesCount);
             if (initPartiesCount > 0)
             {
@@ -146,7 +134,7 @@ namespace ElectionsMandateCalculator.Models
                             _givenMandatesTable1[j, i] += 1;
                             _mirMandatesAvailable[j] -= 1;
                             //INITITIVE COMMITTEE can have only 1 mandate in only 1 MIR
-                            _finalMandateInfos.Add(new Result { MirId = _mirs[i].Id, PartyId = _parties[i].Id, MandatesCount = 1 });
+                            _results.Add(new Result { MirId = _mirs[i].Id, PartyId = _parties[i].Id, MandatesCount = 1 });
                         }
                         workingPartyFlagsTable1[i] = false;
                         //Logger.logger.InfoFormat("{0} excluded from working parties", _parties[i].DisplayName);
@@ -513,12 +501,12 @@ namespace ElectionsMandateCalculator.Models
                             PartyId = partiesWithCalcInfo[j].PartyId,
                             MandatesCount = mirPartyTable[i, j].MandatesGiven,
                         };
-                        _finalMandateInfos.Add(finalMandateInfo);
+                        _results.Add(finalMandateInfo);
                     }
                 }
             }
 
-            foreach (var mif in _finalMandateInfos)
+            foreach (var mif in _results)
             {
                 Logger.logger.InfoFormat("{0},{1},{2}", mif.MirId, mif.PartyId, mif.MandatesCount);
             }

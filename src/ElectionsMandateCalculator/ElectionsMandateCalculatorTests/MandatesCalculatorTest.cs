@@ -71,7 +71,7 @@ namespace ElectionsMandateCalculatorTests
         ///A test for CalculateMandates with sample from github electionscontest/pe2013 repo
         ///</summary>
         [TestMethod()]
-        public void CalculateMandatesTest_Sample_1_Standard()
+        public void CalculateMandates_Test_Sample_1_Standard()
         {
             //sample input
             string mirsFileContent = @"1;""МИР1"";5
@@ -165,7 +165,7 @@ namespace ElectionsMandateCalculatorTests
             
             MandatesCalculator target = new MandatesCalculator(mirs, parties, votes); // TODO: Initialize to an appropriate value
             target.CalculateMandates();
-            var actualResults = target.FinalMandateInfos;
+            var actualResults = target.Results;
             
             Assert.IsTrue(CompareHelpers.AreEqualCollections<Result>(expectedResults, actualResults));
         }

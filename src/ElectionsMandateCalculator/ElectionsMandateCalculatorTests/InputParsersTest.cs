@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using ElectionsMandateCalculator;
 using System.Collections.Generic;
+using ElectionsMandateCalculator.Models;
 
 namespace ElectionsMandateCalculatorTests
 {
@@ -15,8 +16,6 @@ namespace ElectionsMandateCalculatorTests
     [TestClass()]
     public class InputParsersTest
     {
-
-
         private TestContext testContextInstance;
 
         /// <summary>
@@ -70,7 +69,7 @@ namespace ElectionsMandateCalculatorTests
         ///A test for ParseMirFromString
         ///</summary>
         [TestMethod()]
-        public void ParseMirFromStringTest_1()
+        public void Parse_Mir_From_String_Test_1()
         {
             string recordLine = @"1;“МИР 1“;10";
             // 2;“МИР 2“;5
@@ -87,7 +86,7 @@ namespace ElectionsMandateCalculatorTests
         ///A test for ParseCandidateFromString
         ///</summary>
         [TestMethod()]
-        public void ParseCandidateFromStringTest()
+        public void Parse_Candidate_From_String_Test()
         {
             string recordLine = "7;2;\"К7 на П2 в МИР7\""; // TODO: Initialize to an appropriate value
             //7;2;"К7 на П2 в МИР7"
@@ -102,7 +101,7 @@ namespace ElectionsMandateCalculatorTests
         ///A test for ParsePartyFromString
         ///</summary>
         [TestMethod()]
-        public void ParsePartyFromStringTest_Type_Party()
+        public void Parse_Party_From_StringTest_For_Type_Party()
         {
             string recordLine = @"1;“Партия 1“"; // TODO: Initialize to an appropriate value
             /// 1;“Партия 1“
@@ -116,7 +115,7 @@ namespace ElectionsMandateCalculatorTests
         }
 
         [TestMethod()]
-        public void ParsePartyFromStringTest_Type_InitiativeComittee()
+        public void Parse_Party_FromString_Test_For_Type_InitiativeComittee()
         {
             string recordLine = @"1000;“Инициативен комитет в МИР 1“"; // TODO: Initialize to an appropriate value
             /// 1;“Партия 1“
@@ -133,7 +132,7 @@ namespace ElectionsMandateCalculatorTests
         ///A test for ParseVoteFromString
         ///</summary>
         [TestMethod()]
-        public void ParseVoteFromStringTest()
+        public void Parse_Vote_From_String_Test()
         {
             string recordLine = "2;5;5500"; // TODO: Initialize to an appropriate value
             //2;5;5500
@@ -148,7 +147,7 @@ namespace ElectionsMandateCalculatorTests
         ///A test for ParseMirsListFromFileContent
         ///</summary>
         [TestMethod()]
-        public void ParseMirsListFromFileContentTest()
+        public void Parse_MirsList_From_FileContent_Test()
         {
             string fileContent = @"1;""МИР1"";5
 2;""МИР2"";4
@@ -175,7 +174,7 @@ namespace ElectionsMandateCalculatorTests
         }
 
         [TestMethod()]
-        public void ParsePartiesListFromFileContentTest()
+        public void Parse_PartiesList_FromFileContent_Test()
         {
             string fileContent = @"1;""П1""
 2;""П2""
@@ -197,7 +196,7 @@ namespace ElectionsMandateCalculatorTests
         }
 
         [TestMethod()]
-        public void ParseVotesListFromFileContentTest()
+        public void Parse_VotesList_From_FileContent_Test()
         {
             string fileContent = @"1;1;35121
 1;2;20010
@@ -219,7 +218,7 @@ namespace ElectionsMandateCalculatorTests
         }
 
         [TestMethod()]
-        public void ParseResultsListFromFileContentTest()
+        public void Parse_ResultsList_From_FileContent_Test()
         {
             string fileContent = @"1;1;3
 1;2;1
