@@ -36,6 +36,15 @@ namespace ElectionsMandateCalculator.Models
         public PartyType Type { get; set; }
         public int MandatesCount { get; set; }
 
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat(string.Format("Партия {0}", Id));
+            sb.AppendLine(string.Format("Име:{0}", Name));
+            sb.AppendLine(string.Format("Тип:{0}", Type == PartyType.InitCommittee ? "Инициативен комитет" : "Партия/Коалиция"));
+            return sb.ToString();
+        }
+
         #region Equals (for unit testing)
         public override bool Equals(object obj)
         {

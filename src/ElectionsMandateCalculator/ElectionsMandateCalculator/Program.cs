@@ -13,41 +13,42 @@ namespace ElectionsMandateCalculator
     {
         static void Main(string[] args)
         {
-            string dir = "tests\\1";
+            string dir = "";
 
             //MIRS
             string mirsFilePath = Path.Combine(dir, "MIRs.txt");
             var mirs = InputParsers.ParseMirsListFromFile(mirsFilePath);
-            Logger.Info(string.Format("Mirs:{0}", mirs.Count));
+            Logger.Info(string.Format("Брой МИР:{0}", mirs.Count));
 
             //parties
             string partiesFilePath = Path.Combine(dir, "Parties.txt");
             var parties = InputParsers.ParsePartiesListFromFile(partiesFilePath);
-            Logger.Info(string.Format("Parties:{0}", parties.Count));
+            Logger.Info(string.Format("Брой партии:{0}", parties.Count));
 
             //candidates
             string candidatesFilePath = Path.Combine(dir, "Candidates.txt");
             var candidates = InputParsers.ParseCandidatesListFromFile(candidatesFilePath);
-            Logger.Info(string.Format("Candidates:{0}", candidates.Count));
+            Logger.Info(string.Format("Брой кандидати:{0}", candidates.Count));
 
             //votes
             string votesFilePath = Path.Combine(dir, "Votes.txt");
             var votes = InputParsers.ParseVotesListFromFile(votesFilePath);
-            Logger.Info(string.Format("Votes:{0}", votes.Count));
+            Logger.Info(string.Format("Брой записи за гласове:{0}", votes.Count));
 
             //lots
             string lotsFilePath = Path.Combine(dir, "Lot.txt");
+            var lots = new List<Lot>();
             if (File.Exists(lotsFilePath))
             {
-                var lots = InputParsers.ParseLotsListFromFile(lotsFilePath);
-                Logger.Info(string.Format("Lots:{0}", lots.Count));
+                lots = InputParsers.ParseLotsListFromFile(lotsFilePath);
+                Logger.Info(string.Format("Брой записи за жребии:{0}", lots.Count));
             }
             else
             {
-                Logger.Info("No Lots file");
+                Logger.Info("Брой записи за жребии: 0");
             }
 
-            var calc = new MandatesCalculator(mirs, parties, votes);
+            var calc = new MandatesCalculator(mirs, parties, votes, lots);
             calc.CalculateMandates();
         }
     }

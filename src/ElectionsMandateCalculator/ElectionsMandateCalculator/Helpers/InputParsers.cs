@@ -234,9 +234,9 @@ namespace ElectionsMandateCalculator.Helpers
             return itemsList;
         }
 
-        public static List<int> ParseLotsListFromFile(string fileName)
+        public static List<Lot> ParseLotsListFromFile(string fileName)
         {
-            var itemsList = new List<int>();
+            var itemsList = new List<Lot>();
 
             string line;
             // Read the file and display it line by line.
@@ -244,7 +244,8 @@ namespace ElectionsMandateCalculator.Helpers
             {
                 while ((line = file.ReadLine()) != null)
                 {
-                    var item = int.Parse(line);
+                    int lotPartyId = int.Parse(line);
+                    var item = new Lot(lotPartyId);
                     itemsList.Add(item);
                 }
             }

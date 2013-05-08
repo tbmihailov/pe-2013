@@ -162,12 +162,13 @@ namespace ElectionsMandateCalculatorTests
             IList<Party> parties = InputParsers.ParsePartiesListFromFileContent(partiesFileContent); // TODO: Initialize to an appropriate value
             IList<Vote> votes = InputParsers.ParseVotesListFromFileContent(votesFileContent); // TODO: Initialize to an appropriate value
             IList<Result> expectedResults = InputParsers.ParseResultsListFromFileContent(resultsFileContent);
-            
-            MandatesCalculator target = new MandatesCalculator(mirs, parties, votes); // TODO: Initialize to an appropriate value
+            IList<Lot> lots = new List<Lot>();
+            MandatesCalculator target = new MandatesCalculator(mirs, parties, votes, lots); // TODO: Initialize to an appropriate value
             target.CalculateMandates();
             var actualResults = target.Results;
             
             Assert.IsTrue(CompareHelpers.AreEqualCollections<Result>(expectedResults, actualResults));
         }
+
     }
 }

@@ -27,6 +27,14 @@ namespace ElectionsMandateCalculator.Models
 
         public string DisplayName { get { return string.Format("{0} - {1}", Id, Name); } }
 
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat(string.Format("МИР {0}", Id));
+            sb.AppendLine(string.Format("Наименование:{0}", Name));
+            return sb.ToString();
+        }
+
         #region Equals (for unit testing)
         public override bool Equals(object obj)
         {

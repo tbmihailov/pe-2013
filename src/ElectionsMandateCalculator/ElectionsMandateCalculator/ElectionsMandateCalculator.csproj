@@ -50,6 +50,7 @@
     <Compile Include="Helpers\InputParsers.cs" />
     <Compile Include="Helpers\Logger.cs" />
     <Compile Include="Models\Candidate.cs" />
+    <Compile Include="Models\Lot.cs" />
     <Compile Include="Models\MandatesCalculator.cs" />
     <Compile Include="Models\Mir.cs" />
     <Compile Include="Models\Party.cs" />
@@ -64,42 +65,24 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
-    <None Include="Tests\1\README">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Tests\1\Candidates.txt">
+    <Content Include="Candidates.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Tests\1\MIRs.txt">
+    <Content Include="Lot.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Tests\1\Parties.txt">
+    <Content Include="MIRs.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Tests\1\Result.txt">
+    <Content Include="Parties.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Tests\1\Votes.txt">
+    <Content Include="Result.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Tests\with-initiative\Candidates.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Tests\with-initiative\Lot.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Tests\with-initiative\MIRs.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Tests\with-initiative\Parties.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Tests\with-initiative\Result.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Tests\with-initiative\Votes.txt">
+    <Content Include="Votes.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
