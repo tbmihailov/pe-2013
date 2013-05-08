@@ -13,7 +13,14 @@ namespace ElectionsMandateCalculator.Models
         List<Party> _partiesAll;
         List<Mir> _mirsAll;
         List<Vote> _votesAll;
-        List<FinalMandateInfo> _finalMandateInfos;
+        List<Result> _finalMandateInfos;
+
+        public List<Result> FinalMandateInfos
+        {
+            get { return _finalMandateInfos; }
+        }
+
+        
 
         public MandatesCalculator(IEnumerable<Mir> mirs, IEnumerable<Party> parties, IEnumerable<Vote> votes)
         {
@@ -27,7 +34,7 @@ namespace ElectionsMandateCalculator.Models
             int partiesCount = _partiesAll.Count;
 
             _givenMandatesTable1 = new int[mirsCount, partiesCount];
-            _finalMandateInfos = new List<FinalMandateInfo>();
+            _finalMandateInfos = new List<Result>();
         }
 
         //table 1
@@ -139,7 +146,7 @@ namespace ElectionsMandateCalculator.Models
                             _givenMandatesTable1[j, i] += 1;
                             _mirMandatesAvailable[j] -= 1;
                             //INITITIVE COMMITTEE can have only 1 mandate in only 1 MIR
-                            _finalMandateInfos.Add(new FinalMandateInfo { MirId = _mirs[i].Id, PartyId = _parties[i].Id, MandatesCount = 1 });
+                            _finalMandateInfos.Add(new Result { MirId = _mirs[i].Id, PartyId = _parties[i].Id, MandatesCount = 1 });
                         }
                         workingPartyFlagsTable1[i] = false;
                         //Logger.logger.InfoFormat("{0} excluded from working parties", _parties[i].DisplayName);
@@ -500,7 +507,7 @@ namespace ElectionsMandateCalculator.Models
                 {
                     if (mirPartyTable[i, j].MandatesGiven > 0)
                     {
-                        var finalMandateInfo = new FinalMandateInfo()
+                        var finalMandateInfo = new Result()
                         {
                             MirId = mirsWithCalcInfo[i].MirId,
                             PartyId = partiesWithCalcInfo[j].PartyId,
@@ -523,7 +530,7 @@ namespace ElectionsMandateCalculator.Models
         }
     }
 
-    class MirCalcInfo
+    public class MirCalcInfo
     {
         public int MirId { get; set; }
         public int MirIndex { get; set; }
@@ -572,7 +579,7 @@ namespace ElectionsMandateCalculator.Models
         public int MandatesByMirsUnncessary { get { return MandatesByMirsAll - MandatesAll; } }
     }
 
-    class MirPartyCalcInfo
+    public class MirPartyCalcInfo
     {
         //public int PartyId { get; set; }
         //public int PartyIndex { get; set; }
@@ -593,10 +600,5 @@ namespace ElectionsMandateCalculator.Models
         public bool IsMandateCoefHareRUsed2 { get; set; }//used in last step for unnecessary mandates
     }
 
-    class FinalMandateInfo
-    {
-        public int MirId { get; set; }
-        public int PartyId { get; set; }
-        public int MandatesCount { get; set; }
-    }
+    
 }

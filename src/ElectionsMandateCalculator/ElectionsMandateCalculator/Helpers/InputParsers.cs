@@ -118,6 +118,31 @@ namespace ElectionsMandateCalculator.Helpers
 
             return item;
         }
+
+        /// <summary>
+        /// Parse result from sample result file
+        /// 6;3;3
+        /// 6;4;1
+        /// </summary>
+        /// <param name="recordLine"></param>
+        /// <returns></returns>
+        public static Result ParseResultFromString(string recordLine)
+        {
+            if (string.IsNullOrEmpty(recordLine))
+            {
+                throw new ArgumentNullException();
+            }
+
+            var propValues = recordLine.Split(SEPARATOR);
+
+            var item = new Result(
+                                mirId: int.Parse(propValues[0]),
+                                partyId: int.Parse(propValues[1]),
+                                mandatesCount: int.Parse(propValues[2])
+                           );
+
+            return item;
+        }
         #endregion
 
         #region parsing files
@@ -136,7 +161,7 @@ namespace ElectionsMandateCalculator.Helpers
             }
 
             file.Close();
-            
+
             return itemsList;
         }
 
@@ -162,17 +187,28 @@ namespace ElectionsMandateCalculator.Helpers
         public static List<Candidate> ParseCandidatesListFromFile(string fileName)
         {
             var itemsList = new List<Candidate>();
-            
+
             string line;
             // Read the file and display it line by line.
             System.IO.StreamReader file =
                new System.IO.StreamReader(fileName);
-            int currMirId = 0;
-            int currPartyId = 0;
+            int currMirId = -1;
+            int currPartyId = -1;
             int currCandidateIndex = 0;
+
             while ((line = file.ReadLine()) != null)
             {
                 var item = ParseCandidateFromString(line);
+                if ((item.MirId != currMirId)
+                    || (item.PartyId != currPartyId))
+                {
+                    currMirId = item.MirId;
+                    currPartyId = item.PartyId;
+                    currCandidateIndex = 0;
+                }
+
+                currCandidateIndex++;
+                item.SeqNum = currCandidateIndex;
 
                 itemsList.Add(item);
             }
@@ -216,6 +252,114 @@ namespace ElectionsMandateCalculator.Helpers
             }
 
             file.Close();
+
+            return itemsList;
+        }
+
+        public static List<Result> ParseResultsListFromFile(string fileName)
+        {
+            var itemsList = new List<Result>();
+
+            string line;
+            // Read the file and display it line by line.
+            System.IO.StreamReader file =
+               new System.IO.StreamReader(fileName);
+            while ((line = file.ReadLine()) != null)
+            {
+                var item = ParseResultFromString(line);
+                itemsList.Add(item);
+            }
+
+            file.Close();
+
+            return itemsList;
+        }
+        #endregion
+
+        #region parse content form sample files (used for unit testing)
+        public static List<Mir> ParseMirsListFromFileContent(string fileContent)
+        {
+            var itemsList = new List<Mir>();
+
+            var contentLines = fileContent.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in contentLines)
+            {
+                var item = ParseMirFromString(line);
+                itemsList.Add(item);
+            }
+
+            return itemsList;
+        }
+
+        public static List<Party> ParsePartiesListFromFileContent(string fileContent)
+        {
+            var itemsList = new List<Party>();
+
+            var contentLines = fileContent.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in contentLines)
+            {
+                var item = ParsePartyFromString(line);
+                itemsList.Add(item);
+            }
+
+            return itemsList;
+        }
+
+        public static List<Candidate> ParseCandidatesListFromFileContent(string fileContent)
+        {
+            var itemsList = new List<Candidate>();
+
+            int currMirId = -1;
+            int currPartyId = -1;
+            int currCandidateIndex = 0;
+
+            var contentLines = fileContent.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in contentLines)
+            {
+                var item = ParseCandidateFromString(line);
+                if ((item.MirId != currMirId)
+                    || (item.PartyId != currPartyId))
+                {
+                    currMirId = item.MirId;
+                    currPartyId = item.PartyId;
+                    currCandidateIndex = 0;
+                }
+
+                currCandidateIndex++;
+                item.SeqNum = currCandidateIndex;
+
+                itemsList.Add(item);
+            }
+
+            return itemsList;
+        }
+
+        public static List<Vote> ParseVotesListFromFileContent(string fileContent)
+        {
+            var itemsList = new List<Vote>();
+
+            // Read the file and display it line by line.
+            var contentLines = fileContent.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in contentLines)
+            {
+                var item = ParseVoteFromString(line);
+                itemsList.Add(item);
+            }
+
+            return itemsList;
+        }
+
+        public static List<Result> ParseResultsListFromFileContent(string fileContent)
+        {
+            var itemsList = new List<Result>();
+
+            // Read the file and display it line by line.
+            var contentLines = fileContent.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in contentLines)
+            {
+                var item = ParseResultFromString(line);
+                itemsList.Add(item);
+            }
 
             return itemsList;
         }

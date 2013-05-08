@@ -16,7 +16,7 @@ namespace ElectionsMandateCalculator
     /// </summary>
     public class Candidate
     {
-        public Candidate(int mirId, int partyId,string name)
+        public Candidate(int mirId, int partyId, string name)
         {
             MirId = mirId;
             PartyId = partyId;
@@ -32,6 +32,20 @@ namespace ElectionsMandateCalculator
 
         public PartyType PartyType { get; set; }
 
+        #region Equals (for unit testing)
+        public override bool Equals(object obj)
+        {
+            return this.Equals(obj as Candidate);
+        }
+
+        public bool Equals(Candidate otherObj)
+        {
+            return otherObj.MirId == this.MirId
+                    && otherObj.PartyId == this.PartyId
+                    && otherObj.PartyType == this.PartyType
+                    && otherObj.Name == this.Name;
+        }
+        #endregion
     }
 
     /// <summary>
@@ -47,15 +61,27 @@ namespace ElectionsMandateCalculator
             Id = id;
             MandatesLimit = mandatesLimit;
             Name = name;
-            CurrentMandates = 0;
         }
+
         public int Id { get; set; }
         public string Name { get; set; }
         public int MandatesLimit { get; set; }
-        public int CurrentMandates { get; set; }
-        public int MyProperty { get; set; }
 
         public string DisplayName { get { return string.Format("{0} - {1}", Id, Name); } }
+
+        #region Equals (for unit testing)
+        public override bool Equals(object obj)
+        {
+            return this.Equals(obj as Mir);
+        }
+
+        public bool Equals(Mir otherMir)
+        {
+            return otherMir.Id == this.Id
+                    && otherMir.Name == this.Name
+                    && otherMir.MandatesLimit == this.MandatesLimit;
+        }
+        #endregion
     }
 
 
@@ -88,6 +114,21 @@ namespace ElectionsMandateCalculator
         public string Name { get; set; }
         public PartyType Type { get; set; }
         public int MandatesCount { get; set; }
+
+        #region Equals (for unit testing)
+        public override bool Equals(object obj)
+        {
+            return this.Equals(obj as Party);
+        }
+
+        public bool Equals(Party otherObj)
+        {
+            return otherObj.Id == this.Id
+                    && otherObj.Name == this.Name
+                    && otherObj.MandatesCount == this.MandatesCount
+                    && otherObj.Type == this.Type;
+        }
+        #endregion
     }
 
     /// <summary>
@@ -119,28 +160,55 @@ namespace ElectionsMandateCalculator
         /// Valid votes
         /// </summary>
         public int Count { get; set; }
+
+        #region Equals (for unit testing)
+        public override bool Equals(object obj)
+        {
+            return this.Equals(obj as Vote);
+        }
+
+        public bool Equals(Vote otherObj)
+        {
+            return otherObj.MirId == this.MirId
+                    && otherObj.PartyId == this.PartyId
+                    && otherObj.Count == this.Count;
+        }
+        #endregion
     }
 
+
+    //Result info
     public class Result
     {
-        public int MirId { get; set; }
-        public int PartyId { get; set; }
-        public decimal MandatesValue { get; set; }
-    }
-
-    public class Mandate
-    {
-        private int p1;
-        private int p2;
-
-        public Mandate(int mirId, int partyId)
+        public Result(int mirId, int partyId, int mandatesCount)
         {
-            // TODO: Complete member initialization
             this.MirId = mirId;
             this.PartyId = partyId;
+            this.MandatesCount = mandatesCount;
+        }
+
+        public Result()
+        {
+
         }
         public int MirId { get; set; }
         public int PartyId { get; set; }
+        public int MandatesCount { get; set; }
+
+        #region Equals (for unit testing)
+        public override bool Equals(object obj)
+        {
+            return this.Equals(obj as Result);
+        }
+
+        public bool Equals(Result otherObj)
+        {
+            return otherObj.MirId == this.MirId
+                    && otherObj.PartyId == this.PartyId
+                    && otherObj.MandatesCount == this.MandatesCount;
+        }
+        #endregion
+
     }
 
 }
