@@ -153,15 +153,14 @@ namespace ElectionsMandateCalculator.Helpers
 
             string line;
             // Read the file and display it line by line.
-            System.IO.StreamReader file =
-               new System.IO.StreamReader(fileName);
-            while ((line = file.ReadLine()) != null)
+            using (System.IO.StreamReader file = new System.IO.StreamReader(fileName))
             {
-                var item = ParseMirFromString(line);
-                itemsList.Add(item);
+                while ((line = file.ReadLine()) != null)
+                {
+                    var item = ParseMirFromString(line);
+                    itemsList.Add(item);
+                }
             }
-
-            file.Close();
 
             return itemsList;
         }
@@ -172,15 +171,14 @@ namespace ElectionsMandateCalculator.Helpers
 
             string line;
             // Read the file and display it line by line.
-            System.IO.StreamReader file =
-               new System.IO.StreamReader(fileName);
-            while ((line = file.ReadLine()) != null)
+            using (System.IO.StreamReader file = new System.IO.StreamReader(fileName))
             {
-                var item = ParsePartyFromString(line);
-                itemsList.Add(item);
+                while ((line = file.ReadLine()) != null)
+                {
+                    var item = ParsePartyFromString(line);
+                    itemsList.Add(item);
+                }
             }
-
-            file.Close();
 
             return itemsList;
         }
@@ -191,30 +189,29 @@ namespace ElectionsMandateCalculator.Helpers
 
             string line;
             // Read the file and display it line by line.
-            System.IO.StreamReader file =
-               new System.IO.StreamReader(fileName);
-            int currMirId = -1;
-            int currPartyId = -1;
-            int currCandidateIndex = 0;
-
-            while ((line = file.ReadLine()) != null)
+            using (System.IO.StreamReader file = new System.IO.StreamReader(fileName))
             {
-                var item = ParseCandidateFromString(line);
-                if ((item.MirId != currMirId)
-                    || (item.PartyId != currPartyId))
+                int currMirId = -1;
+                int currPartyId = -1;
+                int currCandidateIndex = 0;
+
+                while ((line = file.ReadLine()) != null)
                 {
-                    currMirId = item.MirId;
-                    currPartyId = item.PartyId;
-                    currCandidateIndex = 0;
+                    var item = ParseCandidateFromString(line);
+                    if ((item.MirId != currMirId)
+                        || (item.PartyId != currPartyId))
+                    {
+                        currMirId = item.MirId;
+                        currPartyId = item.PartyId;
+                        currCandidateIndex = 0;
+                    }
+
+                    currCandidateIndex++;
+                    item.SeqNum = currCandidateIndex;
+
+                    itemsList.Add(item);
                 }
-
-                currCandidateIndex++;
-                item.SeqNum = currCandidateIndex;
-
-                itemsList.Add(item);
             }
-
-            file.Close();
 
             return itemsList;
         }
@@ -225,15 +222,14 @@ namespace ElectionsMandateCalculator.Helpers
 
             string line;
             // Read the file and display it line by line.
-            System.IO.StreamReader file =
-               new System.IO.StreamReader(fileName);
-            while ((line = file.ReadLine()) != null)
+            using (System.IO.StreamReader file = new System.IO.StreamReader(fileName))
             {
-                var item = ParseVoteFromString(line);
-                itemsList.Add(item);
+                while ((line = file.ReadLine()) != null)
+                {
+                    var item = ParseVoteFromString(line);
+                    itemsList.Add(item);
+                }
             }
-
-            file.Close();
 
             return itemsList;
         }
@@ -244,15 +240,14 @@ namespace ElectionsMandateCalculator.Helpers
 
             string line;
             // Read the file and display it line by line.
-            System.IO.StreamReader file =
-               new System.IO.StreamReader(fileName);
-            while ((line = file.ReadLine()) != null)
+            using (System.IO.StreamReader file = new System.IO.StreamReader(fileName))
             {
-                var item = int.Parse(line);
-                itemsList.Add(item);
+                while ((line = file.ReadLine()) != null)
+                {
+                    var item = int.Parse(line);
+                    itemsList.Add(item);
+                }
             }
-
-            file.Close();
 
             return itemsList;
         }
@@ -263,15 +258,14 @@ namespace ElectionsMandateCalculator.Helpers
 
             string line;
             // Read the file and display it line by line.
-            System.IO.StreamReader file =
-               new System.IO.StreamReader(fileName);
-            while ((line = file.ReadLine()) != null)
+            using (System.IO.StreamReader file = new System.IO.StreamReader(fileName))
             {
-                var item = ParseResultFromString(line);
-                itemsList.Add(item);
+                while ((line = file.ReadLine()) != null)
+                {
+                    var item = ParseResultFromString(line);
+                    itemsList.Add(item);
+                }
             }
-
-            file.Close();
 
             return itemsList;
         }
