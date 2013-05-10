@@ -72,7 +72,7 @@ namespace ElectionsMandateCalculator
                         using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"Result.txt"))
                         {
                                 file.WriteLine("0");
-                                file.WriteLine("Достигнат е жребий");
+                                file.WriteLine("Достигнат жребий");
                             
                         }
                     }
