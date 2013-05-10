@@ -14,7 +14,7 @@ namespace ElectionsMandateCalculator
         static void Main(string[] args)
         {
             string dir = "";
-
+            Logger.Info("Зареждане на входните данни");
             //MIRS
             string mirsFilePath = Path.Combine(dir, "MIRs.txt");
             var mirs = InputParsers.ParseMirsListFromFile(mirsFilePath);
@@ -48,8 +48,40 @@ namespace ElectionsMandateCalculator
                 Logger.Info("Брой записи за жребии: 0");
             }
 
-            var calc = new MandatesCalculator(mirs, parties, votes, lots);
-            calc.CalculateMandates();
+            try
+            {
+                var calc = new MandatesCalculator(mirs, parties, votes, lots);
+                var results = calc.CalculateMandates();
+
+                if (results!=null && results.Count > 0)
+                {
+
+                    using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"Result.txt"))
+                    {
+                        foreach (var result in results)
+                        {
+                            string line = string.Format("{0};{1};{2}", result.MirId, result.PartyId, result.MandatesCount);
+                            file.WriteLine(line);
+                        }
+                    }
+                }
+                else
+                {
+                    if (calc.IsLotReachedAndNoLots)
+                    {
+                        using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"Result.txt"))
+                        {
+                                file.WriteLine("0");
+                                file.WriteLine("Достигнат е жребий");
+                            
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.logger.Error(e.Message);
+            }
         }
     }
 }

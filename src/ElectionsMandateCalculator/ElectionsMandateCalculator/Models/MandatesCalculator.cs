@@ -15,13 +15,20 @@ namespace ElectionsMandateCalculator.Models
         List<Vote> _votesAll;
         List<Lot> _lots;
         List<Result> _results;
+
         private bool _isLotReachedAndNoLots;
+        public bool IsLotReachedAndNoLots
+        {
+            get { return _isLotReachedAndNoLots; }
+            private set { _isLotReachedAndNoLots = value; }
+        }
+
         public List<Result> Results
         {
             get { return _results; }
         }
 
-        public MandatesCalculator(IEnumerable<Mir> mirs, IEnumerable<Party> parties, IEnumerable<Vote> votes, IEnumerable<Lot> lots )
+        public MandatesCalculator(IEnumerable<Mir> mirs, IEnumerable<Party> parties, IEnumerable<Vote> votes, IEnumerable<Lot> lots)
         {
             _mirsAll = mirs.OrderBy(m => m.Id).ToList();
             _partiesAll = parties.OrderBy(p => p.Id).ToList();
@@ -276,7 +283,7 @@ namespace ElectionsMandateCalculator.Models
                 if (k > mandatesLeft)
                 {
                     Logger.Info("Достигнат е случай на партии с равни коефициенти:");
-                    for (int p = mi; p < mi+k; p++)
+                    for (int p = mi; p < mi + k; p++)
                     {
                         Logger.Info(partiesOrderedByCoefR[p].ToString());
                     }
@@ -285,7 +292,7 @@ namespace ElectionsMandateCalculator.Models
                     {
                         if (_lots.Count != mandatesLeft)
                         {
-                            throw new ArgumentException(string.Format("Броя партии избрани със жребии({0}) е различен от останалите мандати - {1}" ,_lots.Count, mandatesLeft));
+                            throw new ArgumentException(string.Format("Броя партии избрани със жребии({0}) е различен от останалите мандати - {1}", _lots.Count, mandatesLeft));
                         }
                         foreach (var lot in _lots)
                         {
@@ -301,7 +308,7 @@ namespace ElectionsMandateCalculator.Models
                     else
                     {
                         Logger.Info("Достигнат е жребии, за който няма резултати!");
-                        _isLotReachedAndNoLots = true;
+                        IsLotReachedAndNoLots = true;
                     }
                 }
                 else
@@ -314,15 +321,17 @@ namespace ElectionsMandateCalculator.Models
 
             partiesWithCalcInfo = partiesOrderedByCoefR.OrderBy(p => p.Index).ToList();
 
-            Logger.logger.Info("Крайно разпределяна на глобалните мандати:");
+            Logger.logger.Info("Крайно разпределяна на мандати по партии:");
+            Logger.logger.Info(string.Format("{0,6} {1,8} {2,8} {3,8} {4,4} {5,5}", "Номер", "Гласове", "Начални", "Остатък", "Доп", "Общо"));
             foreach (var party in partiesWithCalcInfo)
             {
                 StringBuilder sbMFinal = new StringBuilder();
-                sbMFinal.AppendFormat("{0} {1,6} {2,2} {3,6} {4,3} {5,3}", party.PartyId, party.Votes, party.MandatesGivenInit, party.MandateCoefHareR.ToString("0.000"), party.MandatesGivenAdditional, party.MandatesAll);
+                sbMFinal.AppendFormat("{0,6} {1,8} {2,8} {3,8} {4,4} {5,5}", party.PartyId, party.Votes, party.MandatesGivenInit, party.MandateCoefHareR.ToString("0.000"), party.MandatesGivenAdditional, party.MandatesAll);
                 Logger.logger.Info(sbMFinal.ToString());
             }
 
-            Logger.logger.Info("==Разпределяне на мандати по райони==");
+            Logger.logger.Info("");
+            Logger.logger.Info("== Разпределяне на мандати по райони== ");
             //calculate per mir mandates
             MirPartyCalcInfo[,] mirPartyTable = new MirPartyCalcInfo[mirsCount, partiesCountTable2];
             for (int i = 0; i < mirsCount; i++)
@@ -379,12 +388,13 @@ namespace ElectionsMandateCalculator.Models
                     sum += mirPartyTable[i, j].MandatesInit;
                 }
                 sbLine.AppendFormat("[{0,2}]", sum);
-                sbLine.AppendFormat(" от [{0,2}]", mirsWithCalcInfo[i].MandatesLimit);
+                sbLine.AppendFormat(" от максимални [{0,2}]", mirsWithCalcInfo[i].MandatesLimit);
 
                 Logger.logger.Info(sbLine.ToString());
             }
 
             Logger.logger.Info("Остатъци по райони - R:");
+            Logger.logger.Info("* - получават допълнителен мандат");
             for (int i = 0; i < mirsCount; i++)
             {
                 StringBuilder sbLine = new StringBuilder();
@@ -407,13 +417,12 @@ namespace ElectionsMandateCalculator.Models
                 }
 
                 sbLine.AppendFormat("[{0,2}]", sum);
-                sbLine.AppendFormat(" of [{0,2}]", mirsWithCalcInfo[i].MandatesLimit); ;
+                sbLine.AppendFormat(" от максимални [{0,2}]", mirsWithCalcInfo[i].MandatesLimit); ;
 
                 Logger.logger.Info(sbLine.ToString());
-
             }
 
-            Logger.logger.Info("Крайни мандати по райони:");
+            Logger.logger.Info("Мандати по райони:");
             for (int i = 0; i < mirsCount; i++)
             {
                 StringBuilder sbLine = new StringBuilder();
@@ -424,15 +433,17 @@ namespace ElectionsMandateCalculator.Models
                     sum += mirPartyTable[i, j].MandatesGiven;
                 }
                 sbLine.AppendFormat("[{0,2}]", sum);
-                sbLine.AppendFormat(" of [{0,2}]", mirsWithCalcInfo[i].MandatesLimit);
+                sbLine.AppendFormat(" от [{0,2}]", mirsWithCalcInfo[i].MandatesLimit);
                 Logger.logger.Info(sbLine.ToString());
             }
 
-            Logger.logger.Info("==Преразпределяне на мандати за неудовлетворените партии==");
+            Logger.logger.Info("");
+            Logger.logger.Info("== Преразпределяне на мандати за неудовлетворените партии== ");
             Logger.logger.Info("Текущо състояние:");
+            Logger.logger.InfoFormat("{0,5} : [{2,15}] {1,10} {3,11}", "No.", "Разпр. от райони", "Нац. ниво", "Необходими");
             foreach (var party in partiesWithCalcInfo)
             {
-                Logger.logger.InfoFormat("{0} : [{2}] {1,2} необходими {3}", party.PartyId, party.MandatesByMirsAll, party.MandatesAll, party.MandatesByMirsUnncessary);
+                Logger.logger.InfoFormat("{0,5} : [{2,15}] {1,10} {3,11}", party.PartyId, party.MandatesByMirsAll, party.MandatesAll, party.MandatesByMirsUnncessary);
             }
 
             while (partiesWithCalcInfo.Count(p => p.MandatesByMirsUnncessary < 0) > 0)
@@ -505,9 +516,10 @@ namespace ElectionsMandateCalculator.Models
                 }
 
                 Logger.logger.Info("Текущо състояние:");
+                Logger.logger.InfoFormat("{0,5} : [{2,15}] {1,10} {3,11}", "No.", "Разпр. от райони", "Нац. ниво", "Необходими");
                 foreach (var party in partiesWithCalcInfo)
                 {
-                    Logger.logger.InfoFormat("{0} : [{2}] {1,2} необходими {3}", party.PartyId, party.MandatesByMirsAll, party.MandatesAll, party.MandatesByMirsUnncessary);
+                    Logger.logger.InfoFormat("{0,5} : [{2,15}] {1,10} {3,11}", party.PartyId, party.MandatesByMirsAll, party.MandatesAll, party.MandatesByMirsUnncessary);
                 }
             }
 
@@ -611,5 +623,5 @@ namespace ElectionsMandateCalculator.Models
         public bool IsMandateCoefHareRUsed2 { get; set; }//used in last step for unnecessary mandates
     }
 
-    
+
 }
